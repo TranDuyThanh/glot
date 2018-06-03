@@ -166,7 +166,7 @@ func (plot *Plot) plotXYZ(points *PointGroup) error {
 
 func (plot *Plot) plotCandlesticks(PointGroup *PointGroup) error {
 	data := PointGroup.castedData.(CandlesticksData)
-	nCandles := len(data.Timestamp)
+	nCandles := len(data.Timestamps)
 
 	f, err := ioutil.TempFile(os.TempDir(), gGnuplotPrefix)
 	if err != nil {
@@ -176,7 +176,7 @@ func (plot *Plot) plotCandlesticks(PointGroup *PointGroup) error {
 	plot.tmpfiles[fname] = f
 
 	for i := 0; i < nCandles; i++ {
-		str := fmt.Sprintf("%v %v %v %v %v\n", data.Timestamp[i], data.Candles[i][0], data.Candles[i][1], data.Candles[i][2], data.Candles[i][3])
+		str := fmt.Sprintf("%v %v %v %v %v\n", data.Timestamps[i], data.Candles[i][0], data.Candles[i][1], data.Candles[i][2], data.Candles[i][3])
 		pp.Println(str)
 		f.WriteString(str)
 	}

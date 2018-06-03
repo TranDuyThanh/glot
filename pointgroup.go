@@ -20,11 +20,11 @@ type PointGroup struct {
 
 // CandlesticksData ...
 type CandlesticksData struct {
-	Timestamp []int64
-	Candles   [][]float64
-	UpColor   string
-	DownColor string
-	BoxWidth  float64
+	Timestamps []int64
+	Candles    [][]float64
+	UpColor    string
+	DownColor  string
+	BoxWidth   float64
 }
 
 // AddPointGroup function adds a group of points to a plot.
