@@ -2,6 +2,8 @@ package glot
 
 import (
 	"fmt"
+
+	"github.com/k0kubun/pp"
 )
 
 // A PointGroup refers to a set of points that need to plotted.
@@ -14,6 +16,15 @@ type PointGroup struct {
 	data       interface{} // Data inside the curve in any integer/float format
 	castedData interface{} // The data inside the curve typecasted to float64
 	set        bool        //
+}
+
+// CandlesticksData ...
+type CandlesticksData struct {
+	Timestamp []int64
+	Candles   [][]float64
+	UpColor   string
+	DownColor string
+	BoxWidth  float64
 }
 
 // AddPointGroup function adds a group of points to a plot.
@@ -38,7 +49,7 @@ func (plot *Plot) AddPointGroup(name string, style string, data interface{}) (er
 		"impulses", "dots", "bar",
 		"steps", "fill solid", "histogram", "circle",
 		"errorbars", "boxerrorbars",
-		"boxes", "lp"}
+		"boxes", "lp", "candlesticks"}
 	curve.style = defaultStyle
 	discovered := 0
 	for _, s := range allowed {
@@ -48,7 +59,18 @@ func (plot *Plot) AddPointGroup(name string, style string, data interface{}) (er
 			discovered = 1
 		}
 	}
+
 	switch data.(type) {
+	case CandlesticksData:
+		pp.Println("----------------")
+		pp.Println(plot.dimensions)
+		curve.castedData = data.(CandlesticksData)
+		if plot.dimensions == 2 {
+			plot.plotCandlesticks(curve)
+		} else {
+			return &gnuplotError{fmt.Sprintf("Unsupported data with this dimensions")}
+		}
+		plot.PointGroup[name] = curve
 	case [][]float64:
 		if plot.dimensions != len(data.([][]float64)) {
 			return &gnuplotError{fmt.Sprintf("The dimensions of this PointGroup are not compatible with the dimensions of the plot.\nIf you want to make a 2-d curve you must specify a 2-d plot.")}

@@ -11,6 +11,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+
+	"github.com/k0kubun/pp"
 )
 
 // Plot is the basic type representing a plot.
@@ -157,6 +159,64 @@ func (plot *Plot) plotXYZ(points *PointGroup) error {
 	} else {
 		line = fmt.Sprintf("%s \"%s\" title \"%s\" with %s",
 			cmd, fname, points.name, points.style)
+	}
+	plot.nplots++
+	return plot.Cmd(line)
+}
+
+func (plot *Plot) plotCandlesticks(PointGroup *PointGroup) error {
+	data := PointGroup.castedData.(CandlesticksData)
+	nCandles := len(data.Timestamp)
+
+	f, err := ioutil.TempFile(os.TempDir(), gGnuplotPrefix)
+	if err != nil {
+		return err
+	}
+	fname := f.Name()
+	plot.tmpfiles[fname] = f
+
+	for i := 0; i < nCandles; i++ {
+		str := fmt.Sprintf("%v %v %v %v %v\n", data.Timestamp[i], data.Candles[i][0], data.Candles[i][1], data.Candles[i][2], data.Candles[i][3])
+		pp.Println(str)
+		f.WriteString(str)
+	}
+	f.Close()
+
+	err = plot.Cmd(fmt.Sprintf(`set palette defined (-1 '%s', 1 '%s')`, data.DownColor, data.UpColor))
+	if err != nil {
+		return err
+	}
+	err = plot.Cmd(`set cbrange [-1:1]`)
+	if err != nil {
+		return err
+	}
+	err = plot.Cmd(`unset colorbox`)
+	if err != nil {
+		return err
+	}
+	err = plot.Cmd(`set style fill solid noborder`)
+	if err != nil {
+		return err
+	}
+	err = plot.Cmd(fmt.Sprintf(`set boxwidth %f`, data.BoxWidth))
+	if err != nil {
+		return err
+	}
+
+	cmd := plot.plotcmd
+	if plot.nplots > 0 {
+		cmd = plotCommand
+	}
+
+	if PointGroup.style == "" {
+		PointGroup.style = "candlesticks"
+	}
+	var line string
+	if PointGroup.name == "" {
+		line = fmt.Sprintf("%s \"%s\" using 1:2:4:3:5:($5 < $2 ? -1 : 1) with %s palette", cmd, fname, PointGroup.style)
+	} else {
+		line = fmt.Sprintf("%s \"%s\" using 1:2:4:3:5:($5 < $2 ? -1 : 1) title \"%s\" with %s palette",
+			cmd, fname, PointGroup.name, PointGroup.style)
 	}
 	plot.nplots++
 	return plot.Cmd(line)

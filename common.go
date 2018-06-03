@@ -210,3 +210,12 @@ func (plot *Plot) SetFormat(newformat string) error {
 	err := &gnuplotError{fmt.Sprintf("invalid format '%s'", newformat)}
 	return err
 }
+
+// SetBoxWidth change the width of box
+func (plot *Plot) SetBoxWidth(width float64, absolute bool) error {
+	str := ""
+	if absolute {
+		str = "absolute"
+	}
+	return plot.Cmd(fmt.Sprintf("set boxwidth %f %s", width, str))
+}
