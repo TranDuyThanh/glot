@@ -11,8 +11,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-
-	"github.com/k0kubun/pp"
 )
 
 // Plot is the basic type representing a plot.
@@ -176,9 +174,7 @@ func (plot *Plot) plotCandlesticks(PointGroup *PointGroup) error {
 	plot.tmpfiles[fname] = f
 
 	for i := 0; i < nCandles; i++ {
-		str := fmt.Sprintf("%v %v %v %v %v\n", data.Timestamps[i], data.Candles[i][0], data.Candles[i][1], data.Candles[i][2], data.Candles[i][3])
-		pp.Println(str)
-		f.WriteString(str)
+		f.WriteString(fmt.Sprintf("%v %v %v %v %v\n", data.Timestamps[i], data.Candles[i][0], data.Candles[i][1], data.Candles[i][2], data.Candles[i][3]))
 	}
 	f.Close()
 

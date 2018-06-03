@@ -2,8 +2,6 @@ package glot
 
 import (
 	"fmt"
-
-	"github.com/k0kubun/pp"
 )
 
 // A PointGroup refers to a set of points that need to plotted.
@@ -62,8 +60,6 @@ func (plot *Plot) AddPointGroup(name string, style string, data interface{}) (er
 
 	switch data.(type) {
 	case CandlesticksData:
-		pp.Println("----------------")
-		pp.Println(plot.dimensions)
 		curve.castedData = data.(CandlesticksData)
 		if plot.dimensions == 2 {
 			plot.plotCandlesticks(curve)
