@@ -20,6 +20,7 @@ type PointGroup struct {
 
 // CandlesticksData ...
 type CandlesticksData struct {
+	XArray     []int64 // index of candle
 	Timestamps []int64
 	Candles    [][]float64
 	UpColor    string
