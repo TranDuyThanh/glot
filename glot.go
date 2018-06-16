@@ -63,14 +63,14 @@ func NewPlot(dimensions int, persist, debug bool) (*Plot, error) {
 	return p, nil
 }
 
-func (plot *Plot) plotX(PointGroup *PointGroup) error {
+func (plot *Plot) plotX(pointGroup *PointGroup) error {
 	f, err := ioutil.TempFile(os.TempDir(), gGnuplotPrefix)
 	if err != nil {
 		return err
 	}
 	fname := f.Name()
 	plot.tmpfiles[fname] = f
-	for _, d := range PointGroup.castedData.([]float64) {
+	for _, d := range pointGroup.castedData.([]float64) {
 		f.WriteString(fmt.Sprintf("%v\n", d))
 	}
 	f.Close()
@@ -78,23 +78,28 @@ func (plot *Plot) plotX(PointGroup *PointGroup) error {
 	if plot.nplots > 0 {
 		cmd = plotCommand
 	}
-	if PointGroup.style == "" {
-		PointGroup.style = defaultStyle
+	if pointGroup.style == "" {
+		pointGroup.style = defaultStyle
 	}
 	var line string
-	if PointGroup.name == "" {
-		line = fmt.Sprintf("%s \"%s\" with %s", cmd, fname, PointGroup.style)
+	if pointGroup.name == "" {
+		line = fmt.Sprintf("%s \"%s\" with %s", cmd, fname, pointGroup.style)
 	} else {
 		line = fmt.Sprintf("%s \"%s\" title \"%s\" with %s",
-			cmd, fname, PointGroup.name, PointGroup.style)
+			cmd, fname, pointGroup.name, pointGroup.style)
 	}
+
+	if pointGroup.pointSize > 0 {
+		line = fmt.Sprintf(`%s pt %d ps %.2f`, line, pointGroup.pointType, pointGroup.pointSize)
+	}
+
 	plot.nplots++
 	return plot.Cmd(line)
 }
 
-func (plot *Plot) plotXY(PointGroup *PointGroup) error {
-	x := PointGroup.castedData.([][]float64)[0]
-	y := PointGroup.castedData.([][]float64)[1]
+func (plot *Plot) plotXY(pointGroup *PointGroup) error {
+	x := pointGroup.castedData.([][]float64)[0]
+	y := pointGroup.castedData.([][]float64)[1]
 	npoints := min(len(x), len(y))
 
 	f, err := ioutil.TempFile(os.TempDir(), gGnuplotPrefix)
@@ -114,26 +119,31 @@ func (plot *Plot) plotXY(PointGroup *PointGroup) error {
 		cmd = plotCommand
 	}
 
-	if PointGroup.style == "" {
-		PointGroup.style = "points"
+	if pointGroup.style == "" {
+		pointGroup.style = "points"
 	}
 	var line string
-	if PointGroup.name == "" {
-		line = fmt.Sprintf("%s \"%s\" with %s", cmd, fname, PointGroup.style)
+	if pointGroup.name == "" {
+		line = fmt.Sprintf("%s \"%s\" with %s", cmd, fname, pointGroup.style)
 	} else {
 		line = fmt.Sprintf("%s \"%s\" title \"%s\" with %s",
-			cmd, fname, PointGroup.name, PointGroup.style)
+			cmd, fname, pointGroup.name, pointGroup.style)
 	}
+
+	if pointGroup.pointSize > 0 {
+		line = fmt.Sprintf(`%s pt %d ps %.2f`, line, pointGroup.pointType, pointGroup.pointSize)
+	}
+
 	plot.nplots++
 	return plot.Cmd(line)
 }
 
-func (plot *Plot) plotXYZ(points *PointGroup) error {
-	x := points.castedData.([][]float64)[0]
-	y := points.castedData.([][]float64)[1]
-	z := points.castedData.([][]float64)[2]
-	npoints := min(len(x), len(y))
-	npoints = min(npoints, len(z))
+func (plot *Plot) plotXYZ(pointGroup *PointGroup) error {
+	x := pointGroup.castedData.([][]float64)[0]
+	y := pointGroup.castedData.([][]float64)[1]
+	z := pointGroup.castedData.([][]float64)[2]
+	npointGroup := min(len(x), len(y))
+	npointGroup = min(npointGroup, len(z))
 	f, err := ioutil.TempFile(os.TempDir(), gGnuplotPrefix)
 	if err != nil {
 		return err
@@ -141,7 +151,7 @@ func (plot *Plot) plotXYZ(points *PointGroup) error {
 	fname := f.Name()
 	plot.tmpfiles[fname] = f
 
-	for i := 0; i < npoints; i++ {
+	for i := 0; i < npointGroup; i++ {
 		f.WriteString(fmt.Sprintf("%v %v %v\n", x[i], y[i], z[i]))
 	}
 
@@ -152,12 +162,17 @@ func (plot *Plot) plotXYZ(points *PointGroup) error {
 	}
 
 	var line string
-	if points.name == "" {
-		line = fmt.Sprintf("%s \"%s\" with %s", cmd, fname, points.style)
+	if pointGroup.name == "" {
+		line = fmt.Sprintf("%s \"%s\" with %s", cmd, fname, pointGroup.style)
 	} else {
 		line = fmt.Sprintf("%s \"%s\" title \"%s\" with %s",
-			cmd, fname, points.name, points.style)
+			cmd, fname, pointGroup.name, pointGroup.style)
 	}
+
+	if pointGroup.pointSize > 0 {
+		line = fmt.Sprintf(`%s pt %d ps %.2f`, line, pointGroup.pointType, pointGroup.pointSize)
+	}
+
 	plot.nplots++
 	return plot.Cmd(line)
 }

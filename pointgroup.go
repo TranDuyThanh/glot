@@ -4,6 +4,29 @@ import (
 	"fmt"
 )
 
+// PointType ...
+type PointType int
+
+// PointType definition http://stelweb.asu.cas.cz/~nemeth/work/stuff/gnuplot/
+const (
+	PointTypeDot = iota
+	PointTypePlus
+	PointTypeX
+	PointTypeStar
+	PointTypeSquareWhite
+	PointTypeSquareBlack
+	PointTypeCircleWhite
+	PointTypeCircleBlack
+	PointTypeTriangleUpWhite
+	PointTypeTriangleUpBlack
+	PointTypeTriangleDownWhite
+	PointTypeTriangleDownBlack
+	PointTypeRhombusWhite
+	PointTypeRhombusBlack
+	PointTypePoligonWhite
+	PointTypePoligonBlack
+)
+
 // A PointGroup refers to a set of points that need to plotted.
 // It could either be a set of points or a function of co-ordinates.
 // For Example z = Function(x,y)(3 Dimensional) or  y = Function(x) (2-Dimensional)
@@ -16,6 +39,7 @@ type PointGroup struct {
 	set        bool        //
 	color      string      // Color of the curve/point
 	pointSize  float64     // Size of the point
+	pointType  PointType   // type of point, only apply in case of points
 }
 
 // CandlesticksData ...
@@ -39,12 +63,32 @@ type CandlesticksData struct {
 //  plot.AddPointGroup("Sample2", "points", []int32{1, 2, 4, 11})
 //  plot.SavePlot("1.png")
 func (plot *Plot) AddPointGroup(name string, style string, data interface{}) (err error) {
+	return plot.AddPointGroupAdvance(name, style, 0.0, PointTypePlus, data)
+}
+
+// AddPointGroupAdvance ...
+func (plot *Plot) AddPointGroupAdvance(
+	name string,
+	style string,
+	pointSize float64,
+	pointType PointType,
+	data interface{},
+) (err error) {
+
 	_, exists := plot.PointGroup[name]
 	if exists {
 		return &gnuplotError{fmt.Sprintf("A PointGroup with the name %s  already exists, please use another name of the curve or remove this curve before using another one with the same name.", name)}
 	}
 
-	curve := &PointGroup{name: name, dimensions: plot.dimensions, data: data, set: true}
+	curve := &PointGroup{
+		name:       name,
+		dimensions: plot.dimensions,
+		data:       data,
+		set:        true,
+		pointSize:  pointSize,
+		pointType:  pointType,
+	}
+
 	allowed := []string{
 		"lines", "points", "linepoints",
 		"impulses", "dots", "bar",
