@@ -182,6 +182,31 @@ func (plot *Plot) SavePlot(filename string) (err error) {
 	return nil
 }
 
+// SavePlotWithSize function is used to save the plot at this point.
+// The plot is dynamic and additional pointgroups can be added and removed and different versions
+// of the same plot can be saved.
+//
+// Usage
+//  dimensions := 3
+//  persist := false
+//  debug := false
+//  plot, _ := glot.NewPlot(dimensions, persist, debug)
+//  plot.AddPointGroup("Sample 1", "lines", []float64{2, 3, 4, 1})
+//  plot.SetTitle("Test Results")
+// 	plot.SetZrange(-2,2)
+//  plot.SavePlotWithSize("1.jpeg", 1024, 900)
+func (plot *Plot) SavePlotWithSize(filename string, width, height int) (err error) {
+	if plot.nplots == 0 {
+		return &gnuplotError{fmt.Sprintf("This plot has 0 curves and therefore its a redundant plot and it can't be printed.")}
+	}
+	outputFormat := fmt.Sprintf("set terminal %s size %d,%d", plot.format, width, height)
+	plot.CheckedCmd(outputFormat)
+	outputFileCommand := "set output" + "'" + filename + "'"
+	plot.CheckedCmd(outputFileCommand)
+	plot.CheckedCmd("replot  ")
+	return nil
+}
+
 // SetFormat function is used to save the plot at this point.
 // The plot is dynamic and additional pointgroups can be added and removed and different versions
 // of the same plot can be saved.
@@ -197,8 +222,7 @@ func (plot *Plot) SavePlot(filename string) (err error) {
 //  plot.SavePlot("1.pdf")
 // NOTE: png is default format for saving files.
 func (plot *Plot) SetFormat(newformat string) error {
-	allowed := []string{
-		"png", "pdf"}
+	allowed := []string{"png", "pdf", "svg"}
 	for _, s := range allowed {
 		if newformat == s {
 			plot.format = newformat
@@ -223,5 +247,10 @@ func (plot *Plot) SetBoxWidth(width float64, absolute bool) error {
 // SetPlotScale change the scale of width/height of image
 // set size {{no}square | ratio <r> | noratio} {<xscale>,<yscale>}
 func (plot *Plot) SetPlotScale(xScale float64, yScale float64) error {
-	return plot.Cmd(fmt.Sprintf("set size %f , %f", xScale, yScale))
+	return plot.Cmd(fmt.Sprintf("set size %f,%f", xScale, yScale))
+}
+
+// SetGrid ...
+func (plot *Plot) SetGrid() error {
+	return plot.Cmd("set grid")
 }

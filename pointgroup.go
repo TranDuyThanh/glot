@@ -14,6 +14,8 @@ type PointGroup struct {
 	data       interface{} // Data inside the curve in any integer/float format
 	castedData interface{} // The data inside the curve typecasted to float64
 	set        bool        //
+	color      string      // Color of the curve/point
+	pointSize  float64     // Size of the point
 }
 
 // CandlesticksData ...
