@@ -219,3 +219,9 @@ func (plot *Plot) SetBoxWidth(width float64, absolute bool) error {
 	}
 	return plot.Cmd(fmt.Sprintf("set boxwidth %f %s", width, str))
 }
+
+// SetPlotScale change the scale of width/height of image
+// set size {{no}square | ratio <r> | noratio} {<xscale>,<yscale>}
+func (plot *Plot) SetPlotScale(xScale float64, yScale float64) error {
+	return plot.Cmd(fmt.Sprintf("set size %f , %f", xScale, yScale))
+}
